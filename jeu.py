@@ -1,5 +1,3 @@
-from fltk import *
-
 def jouer(plateau, moutons, direction):
     """ 
     Met à jour les positions des moutons
@@ -42,7 +40,7 @@ def jouer(plateau, moutons, direction):
                         obstacle_atteint = True
 
             moutons.pop(m)
-            moutons.append((i, j)) # Met à jour les coordonnées du mouton avec les nouvelles, stockées dans i et j
+            moutons.insert(m, (i, j)) # Met à jour les coordonnées du mouton avec les nouvelles, stockées dans i et j
 
 
 def victoire(plateau, moutons):
@@ -58,8 +56,10 @@ def victoire(plateau, moutons):
             if plateau[i][j] == 'G':
                 touffes.append((i, j)) # Création d'une liste avec les coordonnées de chaque touffe
 
+    victoire = True
     for pos in touffes:
         if pos not in moutons:
-            return False
-        return True
+            victoire = False
+    
+    return victoire
 

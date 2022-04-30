@@ -1,5 +1,3 @@
-from fltk import *
-
 def charger(fichier):
     """
     Charge la grille en fichier texte vers une liste

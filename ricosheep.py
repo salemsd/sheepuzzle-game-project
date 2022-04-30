@@ -1,28 +1,30 @@
 from fltk import *
 from grille import *
 from jeu import *
+from solveur import *
 
-# Membres du groupe
-# SAOUDI Salem - TP11
-# JIA Siyuan - TP11
-# Thilelli - TP12
+################################### TESTS ##############################################
 
 p_test = [[None, 'B', None, 'B', None],
           ['B', 'B', None, None, 'G'],
-          [None, 'G', 'B', 'B', None],
-          [None, None, 'G', None, None],
+          [None, 'G', 'B', None, None],
+          [None, None, 'G', 'B', None],
           [None, None, None, None, None]]
 m_test = [(0, 4), (1, 3), (4, 2), (4, 1)]
-d_test = 'Up'
-d_test2 = 'Right'
+aaa = [(1, 4), (2, 1), (3, 2)]
 
-jouer(p_test, m_test, d_test)
+#### TEST FONCTION JOUER ###
+# jouer(p_test, m_test, 'Up')
+# jouer(p_test, m_test, 'Right')
 
-jouer(p_test, m_test, d_test2)
+#### TEST FONCTION VICTOIRE ###
+print(f'Victoire: {victoire(p_test, m_test)}\n')
+print(f'Nouvelle position des moutons: {m_test}\n')
 
-print(victoire(p_test, m_test))
-print(m_test)
+#### TEST FONCTION CHARGER ####
+plateau1, moutons1 = charger('maps/wide/wide4.txt')
+print(f'Plateau chargé:\n{plateau1}\n')
+print(f'Coordonnées des moutons chargés: {moutons1}\n')
 
-aplato, akraren = charger('maps/wide/wide4.txt')
-print(aplato)
-print(akraren)
+#### TEST SOLVEUR ####
+print(f'Solutions: {solutions(p_test, m_test)}')
