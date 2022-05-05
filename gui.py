@@ -127,15 +127,13 @@ def affiche_menuGrille(choix):
             elif touche(ev_choixGrille) in alphabet:
                 plateau, moutons = charger(
                     f'maps/{choix.lower()}/{listeGrilles[alphabet.index(touche(ev_choixGrille))]}')
+                ferme_fenetre()
                 break
         elif type_ev(ev_choixGrille) == 'Quitte':
             ferme_fenetre()
             quitte = True
 
     if not (back or quitte):
-        ferme_fenetre()
-        cree_fenetre(len(plateau[0])*box_width +
-                     sideMenu_width, len(plateau)*box_height)
         affiche_jeuMenu(plateau, moutons)
     elif back:
         affiche_menuPrincipal()
@@ -150,6 +148,9 @@ def affiche_jeuMenu(plateau, moutons, first_execution=True):
     """
     window_width = box_width * len(plateau[0]) + sideMenu_width
     window_height = box_height * len(plateau)
+
+    if first_execution:
+        cree_fenetre(window_width, window_height)
 
     rectangle(0, 0, window_width, window_height, remplissage='grey')
 
@@ -247,10 +248,6 @@ def dessine_grille(plateau, moutons):
                 if (i, j) in moutons:
                     image(x_case + box_width/2, y_case +
                           box_height/2, "./media/sheep.png")
-
-
-def efface_grille(width, height):
-    rectangle(0, 0, width, height, remplissage='grey')
 
 
 def affiche_menuVictoire():
