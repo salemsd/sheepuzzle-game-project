@@ -10,13 +10,14 @@ def jouer(plateau, moutons, direction):
     height = len(plateau)
     length = len(plateau[0])
     nb_moutons = len(moutons)
-    
-    for r in range (max(height, length)):
+
+    for r in range(max(height, length)):
         for m in range(nb_moutons):
-            i, j = moutons[m] # Charge les coordonnées du mouton dans deux variables i et j
+            # Charge les coordonnées du mouton dans deux variables i et j
+            i, j = moutons[m]
             obstacle_atteint = False
 
-            while not obstacle_atteint: # Tant qu'il n'y a pas de buissons et que la bordure n'est pas atteinte
+            while not obstacle_atteint:  # Tant qu'il n'y a pas de buissons et que la bordure n'est pas atteinte
                 # Déplace les moutons dans la direction donnée jusqu'à toucher les bordures ou un buisson ou un autre mouton
                 if direction == 'Left':
                     if j != 0 and plateau[i][j-1] != 'B' and (i, j-1) not in moutons:
@@ -40,7 +41,8 @@ def jouer(plateau, moutons, direction):
                         obstacle_atteint = True
 
             moutons.pop(m)
-            moutons.insert(m, (i, j)) # Met à jour les coordonnées du mouton avec les nouvelles, stockées dans i et j
+            # Met à jour les coordonnées du mouton avec les nouvelles, stockées dans i et j
+            moutons.insert(m, (i, j))
 
 
 def victoire(plateau, moutons):
@@ -49,19 +51,19 @@ def victoire(plateau, moutons):
     :param list plateau: La grille du jeu
     :param list moutons: La liste des positions des moutons
     """
-    
+
     touffes = []
     for i in range(len(plateau)):
-        for j in range(len(plateau[0])):   
+        for j in range(len(plateau[0])):
             if plateau[i][j] == 'G':
-                touffes.append((i, j)) # Création d'une liste avec les coordonnées de chaque touffe
+                # Création d'une liste avec les coordonnées de chaque touffe
+                touffes.append((i, j))
 
     victoire = True
     for pos in touffes:
         if pos not in moutons:
             victoire = False
-    touffes = [(1,2), (2,3)]
-    moutons = [(1,2), (2,3), (5,6)]
+    touffes = [(1, 2), (2, 3)]
+    moutons = [(1, 2), (2, 3), (5, 6)]
 
     return victoire
-

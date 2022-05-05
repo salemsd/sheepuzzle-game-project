@@ -7,31 +7,37 @@ def charger(fichier):
     fPlateau = open(fichier, 'r')
     plateau = []
     moutons = []
-    i = 0 # Indice de la ligne
-    rowLengths = [] # Liste pour sauvegarder la taille de chaque ligne de la grille et les comparer
+    i = 0  # Indice de la ligne
+    # Liste pour sauvegarder la taille de chaque ligne de la grille et les comparer
+    rowLengths = []
 
     for line in fPlateau:
-        line = line.strip() # Supprime le caractère \n (nouvelle ligne) qui est à chaque fin de ligne
-        rowLengths.append(len(line)) # Sauvegarde la taille de la ligne actuelle
-        if len(rowLengths) > 1 and rowLengths[i] != rowLengths[i-1]: # Si la taille change d'une ligne à une autre,
-            return None, None                                        # le fichier n'est pas correctement formaté
-        
+        # Supprime le caractère \n (nouvelle ligne) qui est à chaque fin de ligne
+        line = line.strip()
+        # Sauvegarde la taille de la ligne actuelle
+        rowLengths.append(len(line))
+        # Si la taille change d'une ligne à une autre,
+        if len(rowLengths) > 1 and rowLengths[i] != rowLengths[i-1]:
+            # le fichier n'est pas correctement formaté
+            return None, None
+
         row = []
-        j = 0 # Indice de la colonne qui sera reinitialisé à 0 à chaque changement de ligne
-        
+        j = 0  # Indice de la colonne qui sera reinitialisé à 0 à chaque changement de ligne
+
         for char in line:
-            if char not in ['B', 'S', 'G', '_']: # Si l'un des caractères ne correspond pas
+            if char not in ['B', 'S', 'G', '_']:  # Si l'un des caractères ne correspond pas
                 return None, None                # le fichier n'est pas correctement formaté
             if char == '_':
                 row.append(None)
             elif char == 'S':
                 row.append(None)
-                moutons.append((i, j)) # Sauvegarde les coordonnées du mouton dans une liste à part pour les moutons
+                # Sauvegarde les coordonnées du mouton dans une liste à part pour les moutons
+                moutons.append((i, j))
             else:
                 row.append(char)
             j = j + 1
-        
+
         plateau.append(row)
         i = i + 1
-    
+
     return plateau, moutons
