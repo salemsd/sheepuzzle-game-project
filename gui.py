@@ -215,6 +215,8 @@ def efface_grille(width, height):
     rectangle(0, 0, width, height, remplissage='grey')
 
 def affiche_menuVictoire():
+    print('Vous avez gagné!')
+    attente(2)
     ferme_fenetre()
     cree_fenetre(mainMenuWidth, mainMenuHeight)
     rectangle(0, 0, mainMenuWidth, mainMenuHeight, remplissage='black')
