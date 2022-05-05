@@ -5,7 +5,6 @@ def solutions(plateau, moutons, visite=set()):
     if victoire(plateau, moutons):
         return []
     if tuple(moutons) in visite:
-        print('******************')
         return None
 
     # print(f'Avant: {moutons}')

@@ -25,8 +25,9 @@ def charger(fichier):
         j = 0  # Indice de la colonne qui sera reinitialisé à 0 à chaque changement de ligne
 
         for char in line:
-            if char not in ['B', 'S', 'G', '_']:  # Si l'un des caractères ne correspond pas
-                return None, None                # le fichier n'est pas correctement formaté
+            # Si l'un des caractères ne correspond pas, alors le fichier n'est pas correctement formaté
+            if char not in ['B', 'S', 'G', '_']:
+                return None, None
             if char == '_':
                 row.append(None)
             elif char == 'S':

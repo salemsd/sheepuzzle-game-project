@@ -4,12 +4,15 @@ from grille import *
 from jeu import *
 from solveur import *
 
+# Dimensions de la fenêtre du menu principal
 mainMenuWidth = 800
 mainMenuHeight = 600
 
+# Dimensions d'une case
 box_width = 94
 box_height = 92
 
+# Dimensions du menu à droite dans la fenêtre du jeu
 sideMenu_width = box_width * 3
 
 
@@ -19,8 +22,9 @@ def affiche_menuPrincipal():
     """
     cree_fenetre(mainMenuWidth, mainMenuHeight)
     rectangle(0, 0, mainMenuWidth, mainMenuHeight,
-              couleur='', remplissage='black')
+              couleur='', remplissage='black')  # Remplis la fenêtre en noir
 
+    # Affichage du texte de choix de type de grille
     texte(mainMenuWidth/2, mainMenuHeight/6, 'Ricosheep',
           couleur='white', ancrage='center', taille=35)
     texte(mainMenuWidth/2, (mainMenuHeight/6)*2, 'Bienvenue dans le jeu',
@@ -28,8 +32,8 @@ def affiche_menuPrincipal():
     texte(mainMenuWidth/2, (mainMenuHeight/6)*2.7, 'Veuillez choisir un type de grille',
           couleur='white', ancrage='center', taille=20)
 
-    i = 3.5
-    rect_coord = []
+    i = 3.5  # Indice d'incrémentation de la coordonnée y du texte
+    rect_coord = []  # Liste qui va contenir les coordonnées xa, ya, xb, yb de chaque rectangle
     for typeGrille in ['Big', 'Square', 'Tests', 'Theme', 'Wide']:
         texte(mainMenuWidth/2, (mainMenuHeight/6)*i, typeGrille,
               couleur='white', ancrage='center', taille=14)
@@ -40,14 +44,15 @@ def affiche_menuPrincipal():
                   couleur='white', epaisseur=2)
         i = i+0.5
 
-    rectIntervals = []
-    for rect in rect_coord:
-        rectIntervals.append(
-            (getRect_xInterval(rect), getRect_yInterval(rect)))
+    # Liste qui va contenir les intervalles x et y allant de gauche à droite et de haut en bas, de chaque rectangle
+    rectIntervals = []  
+    for rect in rect_coord:  # Pour chaque rectangle de séléction, sauvegarder son intervalle dans la liste
+        rectIntervals.append(get_rectInterval(rect))
 
-    quitte = False
+    quitte = False  # Variable de type bool qui nous permettra de quitter la boucle
     while not quitte:
-        ev_souris = attend_ev()
+        ev_souris = attend_ev()  # Attend un événement sur l'interface
+        # Si c'est un clic gauche enregistre ses coordonnées et vérifie si elles font partie d'un intervalle
         if type_ev(ev_souris) == 'ClicGauche':
             x, y = abscisse(ev_souris), ordonnee(ev_souris)
             if x in rectIntervals[0][0] and y in rectIntervals[0][1]:
@@ -65,20 +70,23 @@ def affiche_menuPrincipal():
             elif x in rectIntervals[4][0] and y in rectIntervals[4][1]:
                 choix = 'Wide'
                 break
+        # Si c'est un clic sur le bouton 'Fermer', arrête la boucle et ferme la fenêtre
         elif type_ev(ev_souris) == 'Quitte':
             quitte = True
             ferme_fenetre()
 
-    if not quitte:
+    if not quitte: # Affiche le choix de grille si l'utilisateur n'a pas quitté
         affiche_menuGrille(choix)
 
 
-def getRect_xInterval(rect):
-    return list(range(int(rect[0]), int(rect[2])+1, 1))
+def get_rectInterval(rect):
+    """
+    Retourne l'intervalle x de gauche à droite et y de haut en bas d'un rectangle
 
-
-def getRect_yInterval(rect):
-    return list(range(int(rect[1]), int(rect[3])+1, 1))
+    :param list rect: Les coordonnées xa, ya, xb, yb du rectangle
+    :return: L'intervalle en forme de liste
+    """
+    return list(range(int(rect[0]), int(rect[2])+1, 1)), list(range(int(rect[1]), int(rect[3])+1, 1))
 
 
 def affiche_menuGrille(choix):
@@ -90,6 +98,7 @@ def affiche_menuGrille(choix):
     rectangle(0, 0, mainMenuWidth, mainMenuHeight,
               couleur='', remplissage='black')
 
+    # Affichage du texte de choix de grille
     texte(mainMenuWidth/2, mainMenuHeight/6,
           f'Vous avez choisi le type {choix}', couleur='white', ancrage='center', taille=35)
     texte(mainMenuWidth/2, (mainMenuHeight/6)*2, f'Choisir une grille (appuyer sur la touche correspondante)',
@@ -98,7 +107,7 @@ def affiche_menuGrille(choix):
           'Appuyez sur Esc pour revenir en arriere', couleur='white', ancrage='center', taille=13)
 
     if choix == 'Big':
-        listeGrilles = listdir('./maps/big')
+        listeGrilles = listdir('./maps/big') # Liste tout les fichiers dans le dossier en forme de liste
     elif choix == 'Square':
         listeGrilles = listdir('./maps/square')
     elif choix == 'Tests':
@@ -108,6 +117,8 @@ def affiche_menuGrille(choix):
     elif choix == 'Wide':
         listeGrilles = listdir('./maps/wide')
 
+    # Retourne les caractères à partir du code ASCII 97 (lettre a)
+    # jusqu'au nombre de fichiers qu'on a, en forme de string dans une liste
     alphabet = list(map(chr, range(97, 97+len(listeGrilles))))
     i = 0
     j = 3.5
@@ -125,6 +136,8 @@ def affiche_menuGrille(choix):
                 back = True
                 ferme_fenetre()
             elif touche(ev_choixGrille) in alphabet:
+                # Si la touche pressée par l'utilsiateur fait partie des touches proposées,
+                # charge la grille demandée
                 plateau, moutons = charger(
                     f'maps/{choix.lower()}/{listeGrilles[alphabet.index(touche(ev_choixGrille))]}')
                 ferme_fenetre()
@@ -141,10 +154,11 @@ def affiche_menuGrille(choix):
 
 def affiche_jeuMenu(plateau, moutons, first_execution=True):
     """
-    Affiche la grille du jeu choisie par l'utilisateur
+    Affiche le menu à droite du jeu et la grille choisie par l'utilisateur si c'est la première execution
 
     :param list plateau: La grille du jeu
     :param list moutons: La liste des moutons
+    :param bool first_execution: Indique si c'est la première fois qu'on appelle la fonction
     """
     window_width = box_width * len(plateau[0]) + sideMenu_width
     window_height = box_height * len(plateau)
@@ -157,6 +171,7 @@ def affiche_jeuMenu(plateau, moutons, first_execution=True):
     sideMenu_x = window_width - sideMenu_width
     rectangle(sideMenu_x, 0, window_width, window_height, remplissage='black')
 
+    # Affichage du texte du menu à droite du jeu
     texte(sideMenu_x + sideMenu_width/2, window_height/11.5,
           'Contrôles du jeu', couleur='white', ancrage='center', taille=20)
     texte(sideMenu_x + sideMenu_width/2, (window_height/11.5)*2.4,
@@ -181,21 +196,28 @@ def affiche_jeuMenu(plateau, moutons, first_execution=True):
 
 
 def affiche_jeu(plateau, moutons):
+    """
+    Affiche la grille du jeu et débute le jeu
+
+    :param list plateau: La grille du jeu
+    :param list moutons: La grille des moutons
+    """
     dessine_grille(plateau, moutons)
 
-    moutons_base = moutons[:]
+    moutons_base = moutons[:] # Crée une copie du jeu de base pour y revenir si l'utilisateur veut rejouer
     back = False
     victoire_gui = victoire(plateau, moutons)
     while not(back or victoire_gui):
         appui_touche = attend_ev()
         if type_ev(appui_touche) == 'Touche':
+            # Si touche directionnelle, efface la grille, joue la direction et redesinne la grille
             if touche(appui_touche) in ['Left', 'Right', 'Up', 'Down']:
                 # efface_grille(grid_width, window_height)
                 efface_tout()
                 affiche_jeuMenu(plateau, moutons, False)
                 jouer(plateau, moutons, touche(appui_touche))
                 dessine_grille(plateau, moutons)
-            elif touche_pressee('r'):
+            elif touche_pressee('r'): # Si rejouer, recharge la grille de base, efface la grille et redessine
                 moutons = moutons_base[:]
                 efface_tout()
                 affiche_jeuMenu(plateau, moutons, False)
@@ -228,8 +250,8 @@ def dessine_grille(plateau, moutons):
 
     for i in range(len(plateau)):
         for j in range(len(plateau[0])):
-            x_case = j * box_width
-            y_case = i * box_height
+            x_case = j * box_width # Abscisse de début de la case à dessiner
+            y_case = i * box_height # Ordonnée
 
             rectangle(x_case, y_case, x_case + box_width,
                       y_case + box_height, epaisseur=2)
@@ -251,11 +273,16 @@ def dessine_grille(plateau, moutons):
 
 
 def affiche_menuVictoire():
+    """
+    Affiche l'écran de victoire en fin de jeu
+    """
     print('Vous avez gagné!')
-    attente(2)
+    attente(2) # Attend 2 secondes avant d'afficher l'écran de victoire
     ferme_fenetre()
     cree_fenetre(mainMenuWidth, mainMenuHeight)
     rectangle(0, 0, mainMenuWidth, mainMenuHeight, remplissage='black')
+    
+    # Texte du menu de victoire
     texte(mainMenuWidth/2, mainMenuHeight/6, 'Bien joué!',
           couleur='white', ancrage='center', taille=30)
     texte(mainMenuWidth/2, (mainMenuHeight/6)*3, 'Appuyer sur \'R\' pour rejouer',

@@ -18,7 +18,8 @@ def jouer(plateau, moutons, direction):
             obstacle_atteint = False
 
             while not obstacle_atteint:  # Tant qu'il n'y a pas de buissons et que la bordure n'est pas atteinte
-                # Déplace les moutons dans la direction donnée jusqu'à toucher les bordures ou un buisson ou un autre mouton
+                # Déplace les moutons dans la direction donnée jusqu'à toucher les bordures ou un
+                # buisson ou un autre mouton
                 if direction == 'Left':
                     if j != 0 and plateau[i][j-1] != 'B' and (i, j-1) not in moutons:
                         j = j - 1
