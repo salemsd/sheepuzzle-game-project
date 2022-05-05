@@ -25,6 +25,7 @@ def charger(fichier):
             if char == '_':
                 row.append(None)
             elif char == 'S':
+                row.append(None)
                 moutons.append((i, j)) # Sauvegarde les coordonnées du mouton dans une liste à part pour les moutons
             else:
                 row.append(char)

@@ -1,9 +1,14 @@
 from fltk import *
 from os import listdir
 from grille import *
+from jeu import *
+from solveur import *
 
 mainMenuWidth = 800
 mainMenuHeight = 600
+
+box_width = 94
+box_height = 92
 
     
 def affiche_menuPrincipal():
@@ -89,7 +94,6 @@ def affiche_menuGrille(choix):
         listeGrilles = listdir('./maps/wide')
 
     alphabet = list(map(chr, range(97, 97+len(listeGrilles))))
-    print(alphabet)
     i = 0
     j = 3.5
     for grille in listeGrilles:
@@ -97,32 +101,27 @@ def affiche_menuGrille(choix):
         i = i + 1
         j = j + 0.5
 
-    back_quitte = False
-    while not back_quitte:
+    back, quitte = False, False
+    while not(back or quitte):
         ev_choixGrille = attend_ev()
         if type_ev(ev_choixGrille) == 'Touche':
-            print(ev_choixGrille)
             if touche_pressee('Escape'):
-                back_quitte = True
+                back = True
                 ferme_fenetre()
-                affiche_menuPrincipal()
-            else:
-                for i in range(len(alphabet)):
-                    if touche_pressee(alphabet[i]):
-                        print(alphabet[i])
-                        plateau, moutons = charger(f'maps/{choix.lower()}/{listeGrilles[i]}')
-                        break
+            elif touche(ev_choixGrille) in alphabet:
+                plateau, moutons = charger(f'maps/{choix.lower()}/{listeGrilles[alphabet.index(touche(ev_choixGrille))]}')
                 break
-
         elif type_ev(ev_choixGrille) == 'Quitte':
-            back_quitte = True
             ferme_fenetre()
+            quitte = True
     
-    if not back_quitte:
-        affiche_jeu(plateau, moutons)
+    if not (back or quitte):
+        affiche_jeuMenu(plateau, moutons)
+    elif back:
+        affiche_menuPrincipal()
 
 
-def affiche_jeu(plateau, moutons):
+def affiche_jeuMenu(plateau, moutons):
     """
     Affiche la grille du jeu choisie par l'utilisateur
 
@@ -130,54 +129,114 @@ def affiche_jeu(plateau, moutons):
     :param list moutons: La liste des moutons
     """
     ferme_fenetre()
-    
-    box_width = 90
-    box_height = 88
 
-    sideMenu_width = 100
+    sideMenu_width = box_width*3
     
     window_width = box_width * len(plateau[0]) + sideMenu_width
     window_height = box_height * len(plateau)
 
     cree_fenetre(window_width, window_height)
     rectangle(0, 0, window_width, window_height, remplissage='grey')
-    attend_fermeture()
     
+    sideMenu_x = window_width - sideMenu_width
+    rectangle(sideMenu_x, 0, window_width, window_height, remplissage='black')
 
+    texte(sideMenu_x + sideMenu_width/2, window_height/11.5, 'Contrôles du jeu', couleur='white', ancrage='center', taille=20)
+    texte(sideMenu_x + sideMenu_width/2, (window_height/11.5)*2.4, 'Touches directionnelles', couleur='white', ancrage='center', taille=13)
+    texte(sideMenu_x + sideMenu_width/2, (window_height/11.5)*3.4, 'Déplacer les moutons', couleur='white', ancrage='center', taille=10)
+    texte(sideMenu_x + sideMenu_width/2, (window_height/11.5)*4.5, 'Touche \'S\'', couleur='white', ancrage='center', taille=13)
+    texte(sideMenu_x + sideMenu_width/2, (window_height/11.5)*5.5, 'Solver la grille', couleur='white', ancrage='center', taille=10)
+    texte(sideMenu_x + sideMenu_width/2, (window_height/11.5)*6.6, 'Touche \'R\'', couleur='white', ancrage='center', taille=13)
+    texte(sideMenu_x + sideMenu_width/2, (window_height/11.5)*7.6, 'Rejouer', couleur='white', ancrage='center', taille=10)
+    texte(sideMenu_x + sideMenu_width/2, (window_height/11.5)*8.7, 'Touche \'Esc\'', couleur='white', ancrage='center', taille=13)
+    texte(sideMenu_x + sideMenu_width/2, (window_height/11.5)*9.7, 'Revenir au menu', couleur='white', ancrage='center', taille=10)
 
+    dessine_grille(plateau, moutons)
+    
+    grid_width = window_width - sideMenu_width
+    
+    moutons_base = moutons[:]
+    back = False
+    victoire_gui = victoire(plateau, moutons)
+    while not(back or victoire_gui):
+        appui_touche = attend_ev()
+        if type_ev(appui_touche) == 'Touche':
+            if touche(appui_touche) in ['Left', 'Right', 'Up', 'Down']:
+                efface_grille(grid_width, window_height)
+                jouer(plateau, moutons, touche(appui_touche))
+                dessine_grille(plateau, moutons)
+            elif touche_pressee('r'):
+                moutons = moutons_base[:]
+                efface_grille(grid_width, window_height)
+                dessine_grille(plateau, moutons)
+            elif touche_pressee('s'):
+                print(f'La solution de cette grille est : {solutions(plateau, moutons)}')
+                moutons = moutons_base[:]
+            elif touche_pressee('Escape'):
+                back = True
+                ferme_fenetre()
+            victoire_gui = victoire(plateau, moutons)
+        elif type_ev(appui_touche) == 'Quitte':
+            ferme_fenetre()
+            break
+        
+    if victoire_gui:
+        affiche_menuVictoire()
+    elif back:
+        affiche_menuPrincipal()
 
-def dessine_grille(x, y, plateau, moutons):
+def dessine_grille(plateau, moutons):
     """
-    x, y: coordonnes du plateau
+    Dessine la grille du jeu dans la fenêtre
+
     :param list plateau: La grille du jeu
     :param list moutons: La liste des moutons
     """
-    # dessine le plateau
-    for j in range(len(p)):
-        for i in range(len(p[j])):
-            xt = x + i * 90
-            yt = y + j * 88
-            rectangle(xt, yt, xt + 90, yt + 88)
-            if p[j][i] == 'G':
-                image(xt + 45, yt + 44, "./media/grass.png")
-            elif p[j][i] == 'B':
-                image(xt + 45, yt + 44, "./media/bush.png")
-    # dessine les moutons
-    for i in ms:
-        xi, yi = i
-        image(xi * 90 + 45, yi * 88 + 44, "./media/sheep.png")
-    return
+
+    for i in range(len(plateau)):
+        for j in range(len(plateau[0])):
+            x_case = j * box_width
+            y_case = i * box_height
+            
+            rectangle(x_case, y_case, x_case + box_width, y_case + box_height, epaisseur=2)
+
+            if plateau[i][j] == 'G':
+                if (i, j) in moutons:
+                    image(x_case + box_width/2, y_case + box_height/2, "./media/sheep_grass.png")
+                else:
+                    image(x_case + box_width/2, y_case + box_height/2, "./media/grass.png")
+            elif plateau[i][j] == 'B':
+                image(x_case + box_width/2, y_case + box_height/2, "./media/bush.png")
+            else:
+                if (i, j) in moutons:
+                    image(x_case + box_width/2, y_case + box_height/2, "./media/sheep.png")
+
+def efface_grille(width, height):
+    rectangle(0, 0, width, height, remplissage='grey')
+
+def affiche_menuVictoire():
+    ferme_fenetre()
+    cree_fenetre(mainMenuWidth, mainMenuHeight)
+    rectangle(0, 0, mainMenuWidth, mainMenuHeight, remplissage='black')
+    texte(mainMenuWidth/2, mainMenuHeight/6, 'Bien joué!', couleur='white', ancrage='center', taille=30)
+    texte(mainMenuWidth/2, (mainMenuHeight/6)*3, 'Appuyer sur \'R\' pour rejouer', couleur='white', ancrage='center', taille=20)
+    texte(mainMenuWidth/2, (mainMenuHeight/6)*4, 'Appuyer sur \'Q\' pour quitter', couleur='white', ancrage='center', taille=20)
+
+    back = False
+    while not back:
+        choix = attend_ev()
+        if type_ev(choix) == 'Touche':
+            if touche_pressee('r'):
+                ferme_fenetre()
+                back = True
+            elif touche_pressee('q'):
+                ferme_fenetre()
+                break
+        elif type_ev(choix) == 'Quitte':
+            ferme_fenetre()
+            break
     
-def dessine_menu(ps, lms):
-    """
-    ps: ensemble des plateaus à choisir
-    lms: liste des listes des moutons
-    """
-    p = ps[0]
-    # calcule la taille d'un plateau
-    l = 90 * len(p)
-    x, y = 0, 0
-    for i in range(len(ps)):
-        x = i * l
-        dessine_grille(x, 0, ps[i], lms[i])
+    if back:
+        affiche_menuPrincipal()
+
         
