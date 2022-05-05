@@ -1,7 +1,6 @@
 from jeu import *
 
-def solutions(plateau, moutons):
-    visite = set()
+def solutions(plateau, moutons, visite = set()):
     if victoire(plateau, moutons):
         return []
     if tuple(moutons) in visite:
@@ -16,10 +15,12 @@ def solutions(plateau, moutons):
         jouer(plateau, moutons, direction)
         # print(f'{direction} : {moutons}')
         
-        s = solutions(plateau, moutons)
+        s = solutions(plateau, moutons, visite)
         
         if s != None:
             # print(moutons)
             return [direction] + s
         
+        else:
+           continue
         # print('----------- DEJA VISITE ----------')

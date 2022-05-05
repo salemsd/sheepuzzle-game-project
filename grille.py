@@ -2,7 +2,7 @@ def charger(fichier):
     """
     Charge la grille en fichier texte vers une liste
     :param str fichier: Le chemin du fichier à charger
-    :return: La grille du jeu en forme de liste de liste
+    :return: La grille du jeu et la liste des moutons
     """
     fPlateau = open(fichier, 'r')
     plateau = []
