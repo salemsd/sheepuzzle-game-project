@@ -1,7 +1,6 @@
 from fltk import *
 from os import listdir
 from grille import *
-from jeu import *
 from solveur import *
 
 # Dimensions de la fenêtre du menu principal
@@ -45,7 +44,7 @@ def affiche_menuPrincipal():
         i = i+0.5
 
     # Liste qui va contenir les intervalles x et y allant de gauche à droite et de haut en bas, de chaque rectangle
-    rectIntervals = []  
+    rectIntervals = []
     for rect in rect_coord:  # Pour chaque rectangle de séléction, sauvegarder son intervalle dans la liste
         rectIntervals.append(get_rectInterval(rect))
 
@@ -75,7 +74,7 @@ def affiche_menuPrincipal():
             quitte = True
             ferme_fenetre()
 
-    if not quitte: # Affiche le choix de grille si l'utilisateur n'a pas quitté
+    if not quitte:  # Affiche le choix de grille si l'utilisateur n'a pas quitté
         affiche_menuGrille(choix)
 
 
@@ -107,7 +106,8 @@ def affiche_menuGrille(choix):
           'Appuyez sur Esc pour revenir en arriere', couleur='white', ancrage='center', taille=13)
 
     if choix == 'Big':
-        listeGrilles = listdir('./maps/big') # Liste tout les fichiers dans le dossier en forme de liste
+        # Liste tout les fichiers dans le dossier en forme de liste
+        listeGrilles = listdir('./maps/big')
     elif choix == 'Square':
         listeGrilles = listdir('./maps/square')
     elif choix == 'Tests':
@@ -204,7 +204,8 @@ def affiche_jeu(plateau, moutons):
     """
     dessine_grille(plateau, moutons)
 
-    moutons_base = moutons[:] # Crée une copie du jeu de base pour y revenir si l'utilisateur veut rejouer
+    # Crée une copie du jeu de base pour y revenir si l'utilisateur veut rejouer
+    moutons_base = moutons[:]
     back = False
     victoire_gui = victoire(plateau, moutons)
     while not(back or victoire_gui):
@@ -217,15 +218,19 @@ def affiche_jeu(plateau, moutons):
                 affiche_jeuMenu(plateau, moutons, False)
                 jouer(plateau, moutons, touche(appui_touche))
                 dessine_grille(plateau, moutons)
-            elif touche_pressee('r'): # Si rejouer, recharge la grille de base, efface la grille et redessine
+            # Si rejouer, recharge la grille de base, efface la grille et redessine
+            elif touche_pressee('r'):
                 moutons = moutons_base[:]
                 efface_tout()
                 affiche_jeuMenu(plateau, moutons, False)
                 dessine_grille(plateau, moutons)
             elif touche_pressee('s'):
-                print(
-                    f'La solution de cette grille est : {solutions(plateau, moutons)}')
-                moutons = moutons_base[:]
+                moutons_avantSol = moutons[:]
+                sol = solutions(plateau, moutons, first_execution=True)
+                print(f'La solution de cette grille est : {sol}')
+                if sol is not None:
+                    print(f'Longueur: {len(sol)}')
+                moutons = moutons_avantSol[:]
             elif touche_pressee('Escape'):
                 back = True
                 ferme_fenetre()
@@ -250,8 +255,8 @@ def dessine_grille(plateau, moutons):
 
     for i in range(len(plateau)):
         for j in range(len(plateau[0])):
-            x_case = j * box_width # Abscisse de début de la case à dessiner
-            y_case = i * box_height # Ordonnée
+            x_case = j * box_width  # Abscisse de début de la case à dessiner
+            y_case = i * box_height  # Ordonnée
 
             rectangle(x_case, y_case, x_case + box_width,
                       y_case + box_height, epaisseur=2)
@@ -277,11 +282,11 @@ def affiche_menuVictoire():
     Affiche l'écran de victoire en fin de jeu
     """
     print('Vous avez gagné!')
-    attente(2) # Attend 2 secondes avant d'afficher l'écran de victoire
+    attente(2)  # Attend 2 secondes avant d'afficher l'écran de victoire
     ferme_fenetre()
     cree_fenetre(mainMenuWidth, mainMenuHeight)
     rectangle(0, 0, mainMenuWidth, mainMenuHeight, remplissage='black')
-    
+
     # Texte du menu de victoire
     texte(mainMenuWidth/2, mainMenuHeight/6, 'Bien joué!',
           couleur='white', ancrage='center', taille=30)
