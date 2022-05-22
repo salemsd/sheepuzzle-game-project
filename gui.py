@@ -152,13 +152,15 @@ def affiche_menuGrille(choix):
         affiche_menuPrincipal()
 
 
-def affiche_jeuMenu(plateau, moutons, first_execution=True):
+def affiche_jeuMenu(plateau, moutons, first_execution=True, affiche_recherche=False, affiche_sol=False):
     """
     Affiche le menu à droite du jeu et la grille choisie par l'utilisateur si c'est la première execution
 
     :param list plateau: La grille du jeu
     :param list moutons: La liste des moutons
     :param bool first_execution: Indique si c'est la première fois qu'on appelle la fonction
+    :param bool affiche_recherche: Indique si l'affichage graphique de la recherche est actif (inactif par défaut)
+    :param bool affiche_sol: Indique si l'affichage de la solution graphiquement est actif (inactif par défaut)
     """
     window_width = box_width * len(plateau[0]) + sideMenu_width
     window_height = box_height * len(plateau)
@@ -190,6 +192,28 @@ def affiche_jeuMenu(plateau, moutons, first_execution=True):
           'Touche \'Esc\'', couleur='white', ancrage='center', taille=13)
     texte(sideMenu_x + sideMenu_width/2, (window_height/11.5)*9.7,
           'Revenir au menu', couleur='white', ancrage='center', taille=10)
+    texte(sideMenu_x + sideMenu_width/5.5, (window_height/11.5)*10.5,
+          'Touche \'A\': ', couleur='white', ancrage='center', taille=9)
+    texte(sideMenu_x + sideMenu_width/1.82, (window_height/11.5)*10.5,
+          'Affichage de la recherche:', couleur='white', ancrage='center', taille=9)
+    texte(sideMenu_x + sideMenu_width/5.5, (window_height/11.5)*11.1,
+          'Touche \'Z\': ', couleur='white', ancrage='center', taille=9)
+    texte(sideMenu_x + sideMenu_width/1.82, (window_height/11.5)*11.1,
+          'Affichage de la solution:', couleur='white', ancrage='center', taille=9)
+
+    if affiche_recherche:
+        texte(sideMenu_x + sideMenu_width/1.16, (window_height/11.5)*10.5,
+              'Actif', couleur='white', ancrage='center', taille=9)
+    else:
+        texte(sideMenu_x + sideMenu_width/1.16, (window_height/11.5)*10.5,
+              'Inactif', couleur='white', ancrage='center', taille=9)
+    
+    if affiche_sol:
+        texte(sideMenu_x + sideMenu_width/1.16, (window_height/11.5)*11.1,
+              'Actif', couleur='white', ancrage='center', taille=9)
+    else:
+        texte(sideMenu_x + sideMenu_width/1.16, (window_height/11.5)*11.1,
+              'Inactif', couleur='white', ancrage='center', taille=9)
 
     if first_execution:
         affiche_jeu(plateau, moutons)
@@ -207,8 +231,10 @@ def affiche_jeu(plateau, moutons):
     # Crée une copie du jeu de base pour y revenir si l'utilisateur veut rejouer
     moutons_base = moutons[:]
     back = False
-    victoire_gui = victoire(plateau, moutons)
-    while not(back or victoire_gui):
+    victoire_gui = victoire_def(plateau, moutons)
+    aff_rech = False  # Affichage de la recherche inactif par défaut
+    aff_sol = False # Affichage de la solution inactif par défaut
+    while not(back or victoire_gui is not None):
         appui_touche = attend_ev()
         if type_ev(appui_touche) == 'Touche':
             # Si touche directionnelle, efface la grille, joue la direction et redesinne la grille
@@ -222,28 +248,117 @@ def affiche_jeu(plateau, moutons):
             elif touche_pressee('r'):
                 moutons = moutons_base[:]
                 efface_tout()
-                affiche_jeuMenu(plateau, moutons, False)
+                affiche_jeuMenu(plateau, moutons, False, aff_rech, aff_sol)
                 dessine_grille(plateau, moutons)
             elif touche_pressee('s'):
-                moutons_avantSol = moutons[:]
-                sol = solutions(plateau, moutons, first_execution=True)
+                moutons_avantSol = moutons[:] # Enregistre les moutons avant recherche
+                
+                if not aff_rech:
+                    sol = solutions(plateau, moutons, first_execution=True)
+                    moutons = moutons_avantSol[:] # Restaure les moutons après la recherche
+                if aff_rech:
+                    sol = solutions_gui(plateau, moutons, aff_sol, first_execution=True)
+                    moutons = moutons_avantSol[:]
+                    attente(0.7)
+                    efface_tout()
+                    print(aff_sol)
+                    affiche_jeuMenu(plateau, moutons, False, aff_rech, aff_sol)
+                    dessine_grille(plateau, moutons)    
+                if aff_sol:
+                    if aff_rech:
+                        attente(0.7)
+                    jouer_sol(plateau, moutons, sol, aff_rech)
+                    attente(0.7)
+                    moutons = moutons_avantSol[:]
+                    efface_tout()
+                    affiche_jeuMenu(plateau, moutons, False, aff_rech, aff_sol)
+                    dessine_grille(plateau, moutons)
+                
                 print(f'La solution de cette grille est : {sol}')
                 if sol is not None:
                     print(f'Longueur: {len(sol)}')
-                moutons = moutons_avantSol[:]
+            
+            elif touche_pressee('a'):
+                aff_rech = not aff_rech
+                efface_tout()
+                affiche_jeuMenu(plateau, moutons, False, aff_rech, aff_sol)
+                dessine_grille(plateau, moutons)
+
+            elif touche_pressee('z'):
+                aff_sol = not aff_sol
+                efface_tout()
+                affiche_jeuMenu(plateau, moutons, False, aff_rech, aff_sol)
+                dessine_grille(plateau, moutons)
+
             elif touche_pressee('Escape'):
                 back = True
                 ferme_fenetre()
-            victoire_gui = victoire(plateau, moutons)
+            victoire_gui = victoire_def(plateau, moutons)
         elif type_ev(appui_touche) == 'Quitte':
             ferme_fenetre()
             break
 
-    if victoire_gui:
-        affiche_menuVictoire()
+    if victoire_gui == True:
+        affiche_menuFinJeu(True)
+    elif victoire_gui == False:
+        affiche_menuFinJeu(False)
     elif back:
         affiche_menuPrincipal()
 
+def solutions_gui(plateau, moutons, aff_sol, visite=set(), first_execution=False):
+    '''
+    Recherche la solution du plateau avec le parcours en profondeur
+
+    :param list plateau: La grille du jeu
+    :param list moutons: La liste des positions des moutons
+    :param set visite: L'ensemble des positions visitées
+    :param bool first_execution: Indique si c'est la première fois qu'on appelle la fonction
+    '''
+    # Si c'est la première execution, vide l'ensemble visite des eventuelles positions des précédentes executions
+    if first_execution:
+        visite.clear()
+    if victoire(plateau, moutons):
+        return []
+    if tuple(moutons_trie(moutons)) in visite:
+        return None
+
+    visite.add(tuple(moutons_trie(moutons)))
+    # Enregistre la position des moutons avant de jouer pour y revenir
+    moutons_annule = moutons[:]
+
+    for direction in ['Left', 'Right', 'Up', 'Down']:
+
+        jouer(plateau, moutons, direction) # Joue le coup
+        efface_tout() 
+        affiche_jeuMenu(plateau, moutons, False, True, aff_sol)
+        dessine_grille(plateau, moutons) # Dessine la nouvelle grille
+        attente(0.15) # Attend 0.15 sec avant de jouer l'autre coup
+
+        s = solutions(plateau, moutons, visite)
+
+        if s != None:
+            # moutons = moutons_annule[:]
+            return [direction] + s
+        # Si le cas a déjà été visité, annule le jeu et continue à partir de là
+        else:
+            moutons = moutons_annule[:]
+            continue
+
+def jouer_sol(plateau, moutons, sol, aff_rech):
+    '''
+    Joue une série de coups entière sur un plateau
+
+    :param list plateau: La grille du jeu
+    :param list moutons: La liste des positions des moutons
+    :param list sol: La liste des coups à jouer (ou la solution)
+    '''
+    if sol is not None and len(sol) != 0:
+        for direction in sol:
+            jouer(plateau, moutons, direction)
+            efface_tout()
+            affiche_jeuMenu(plateau, moutons, False, aff_rech, True)
+            dessine_grille(plateau, moutons)
+            attente(0.15)
 
 def dessine_grille(plateau, moutons):
     """
@@ -277,19 +392,26 @@ def dessine_grille(plateau, moutons):
                           box_height/2, "./media/sheep.png")
 
 
-def affiche_menuVictoire():
+def affiche_menuFinJeu(victoire):
     """
     Affiche l'écran de victoire en fin de jeu
     """
-    print('Vous avez gagné!')
-    attente(2)  # Attend 2 secondes avant d'afficher l'écran de victoire
+    if victoire:
+        print('Vous avez gagné!')
+    else:
+        print('Vous avez perdu!')
+    attente(1)  # Attend 1 seconde avant d'afficher l'écran de victoire
     ferme_fenetre()
     cree_fenetre(mainMenuWidth, mainMenuHeight)
     rectangle(0, 0, mainMenuWidth, mainMenuHeight, remplissage='black')
 
-    # Texte du menu de victoire
-    texte(mainMenuWidth/2, mainMenuHeight/6, 'Bien joué!',
-          couleur='white', ancrage='center', taille=30)
+    # Texte du menu de fin de jeu
+    if victoire:
+        texte(mainMenuWidth/2, mainMenuHeight/6, 'Bien joué!',
+              couleur='white', ancrage='center', taille=30)
+    else:
+        texte(mainMenuWidth/2, mainMenuHeight/6, 'Perdu!',
+              couleur='white', ancrage='center', taille=30)
     texte(mainMenuWidth/2, (mainMenuHeight/6)*3, 'Appuyer sur \'R\' pour rejouer',
           couleur='white', ancrage='center', taille=20)
     texte(mainMenuWidth/2, (mainMenuHeight/6)*4, 'Appuyer sur \'Q\' pour quitter',

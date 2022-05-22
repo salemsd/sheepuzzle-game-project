@@ -1,18 +1,37 @@
 from jeu import *
+from collections import deque
 
 def moutons_trie(moutons):
     return sorted(moutons, key=lambda coord: (coord[0], coord[1]))
 
-def jouer_sol(plateau, moutons, sol):
-    '''
-    Joue une série de coups entière sur un plateau
+def victoire_def(plateau, moutons):
+    """
+    Détection de la victoire ET de la défaite (si le solveur ne trouve aucune solution)
 
     :param list plateau: La grille du jeu
     :param list moutons: La liste des positions des moutons
-    :param list sol: La liste des coups à jouer (ou la solution)
-    '''
-    for direction in sol:
-        jouer(plateau, moutons, direction)
+    :return: True si le jeu est gagné, False si on a perdu, None si on n'a pas encore gagné
+    """
+    
+    touffes = []
+    for i in range(len(plateau)):
+        for j in range(len(plateau[0])):
+            if plateau[i][j] == 'G':
+                # Création d'une liste avec les coordonnées de chaque touffe
+                touffes.append((i, j))
+
+    for pos in touffes:
+        # Si une seule des touffes n'est pas encore recouverte, on procède au test de défaite
+        if pos not in moutons:     
+            moutons_test = moutons[:]
+            test_def = solutions(plateau, moutons_test, first_execution=True)
+            # Si le solveur ne retourne aucune solution, on a perdu
+            if test_def is None:
+                return False
+            # Sinon, on peut encore continuer de jouer
+            return None
+
+    return True
 
 def solutions(plateau, moutons, visite=set(), first_execution=False):
     '''
@@ -50,7 +69,7 @@ def solutions(plateau, moutons, visite=set(), first_execution=False):
             continue
 
 
-def solutions_lrg(plateau, moutons, visite=set()):
+def solutions_lrg(plateau, moutons, visite=set(), dir_queue=deque(), first_execution=False):
     '''
     Recherche la solution du plateau avec le parcours en largeur
 
@@ -59,24 +78,7 @@ def solutions_lrg(plateau, moutons, visite=set()):
     :param set visite: L'ensemble des positions visitées
     :param bool first_execution: Indique si c'est la première fois qu'on appelle la fonction
     '''
-    if victoire(plateau, moutons):
-        return []
-    if tuple(moutons) in visite:
-        return None
-
-    # print(f'Avant: {moutons}')
-    visite.add(tuple(moutons))
-    moutons_annule = moutons[:]
-    # print(f'Visites: {visite}')
-    for direction in ['Down', 'Up', 'Right', 'Left']:
-
-        jouer(plateau, moutons, direction)
-        # print(f'{direction} : {moutons}')
-
-        s = solutions(plateau, moutons, visite)
-
-        if s != None:
-            moutons = moutons_annule[:]
-            return [direction] + s
-        else:
-            moutons = moutons_annule[:]
+    # Si c'est la première execution, vide l'ensemble visite des eventuelles positions des précédentes executions
+    if first_execution:
+        visite.clear()
+        dir_queue.clear()

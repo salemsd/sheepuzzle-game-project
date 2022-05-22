@@ -2,6 +2,8 @@ from gui import *
 
 ################################### TESTS ##############################################
 
+#### GRILLES DE TEST ####
+
 p_test = [[None, 'B', None, 'B', None],
           ['B', 'B', None, None, 'G'],
           [None, 'G', 'B', None, None],
@@ -24,15 +26,15 @@ m_test1 = [(0, 3), (0, 2), (0, 9), (0, 1), (1, 3), (6, 4), (6, 2), (3, 4)]
 # print(f'Coordonnées des moutons chargés: {moutons1}\n')
 
 #### TEST SOLVEUR PROFONDEUR ####
-sol1 = solutions(p_test, m_test)
-print(f'Solutions: {sol1}')
-if sol1 is not None:
-    print(f'Longueur: {len(sol1)}')
-jouer_sol(p_test, m_test, sol1)
-print(f'Solution marche: {victoire(p_test, m_test)}')
+# sol1 = solutions(p_test, m_test, first_execution=True)
+# print(f'Solutions: {sol1}')
+# if sol1 is not None:
+#     print(f'Longueur: {len(sol1)}')
+# jouer_sol(p_test, m_test, sol1)
+# print(f'Solution marche: {victoire(p_test, m_test)}')
 
 # #### TEST SOLVEUR LARGEUR ####
-# sol2 = solutions_lrg(p_test, m_test)
+# sol2 = solutions_lrg(p_test, m_test, first_execution=True)
 # print(f'Solutions: {sol2}')
 # if sol2 is not None:
 #     print(f'Longueur: {len(sol2)}')
@@ -40,4 +42,4 @@ print(f'Solution marche: {victoire(p_test, m_test)}')
 # print(f'Solution marche: {victoire(p_test, m_test)}')
 
 ### TEST INTERFACE GRAPHIQUE ####
-# affiche_menuPrincipal()
+affiche_menuPrincipal()

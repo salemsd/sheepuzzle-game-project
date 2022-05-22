@@ -78,7 +78,5 @@ def victoire(plateau, moutons):
     for pos in touffes:
         if pos not in moutons:
             victoire = False
-    touffes = [(1, 2), (2, 3)]
-    moutons = [(1, 2), (2, 3), (5, 6)]
 
     return victoire
